@@ -3,19 +3,22 @@ const produtos = [
     nome: "Perfume Elegance",
     descricao: "Fragrância suave e marcante.",
     preco: "R$ 129,90",
-    imagem: "./imagens/perfume.jpg"
+    imagem: "./imagens/perfume.jpg",
+    categoria: "beleza"
   },
   {
     nome: "Creme Hidratante",
     descricao: "Hidratação profunda para todos os tipos de pele.",
     preco: "R$ 59,90",
-    imagem: "./imagens/creme.jpg"
+    imagem: "./imagens/creme.jpg",
+    categoria: "beleza"
   },
   {
     nome: "Batom Luxo",
     descricao: "Cor intensa e duradoura.",
     preco: "R$ 39,90",
-    imagem: "./imagens/batom.jpg"
+    imagem: "./imagens/batom.jpg",
+    categoria: "beleza"
   },
   {
     nome: "Shampoo Revitalizante",
@@ -59,13 +62,15 @@ const produtos = [
     nome: "Camiseta Básica Masculina",
     descricao: "Conforto e estilo para o dia a dia.",
     preco: "R$ 39,90",
-    imagem: "./imagens/camiseta-masculina.jpg"
+    imagem: "./imagens/camiseta-masculina.jpg",
+    categoria: "roupas"
   },
   {
     nome: "Vestido Floral Feminino",
     descricao: "Leveza e elegância para todas as ocasiões.",
     preco: "R$ 89,90",
-    imagem: "./imagens/vestido-floral.jpg"
+    imagem: "./imagens/vestido-floral.jpg",
+    categoria: "roupas"
   },
   {
     nome: "Calça Jeans Skinny",
@@ -77,13 +82,15 @@ const produtos = [
     nome: "Tênis Esportivo Unissex",
     descricao: "Ideal para caminhadas e academia.",
     preco: "R$ 149,90",
-    imagem: "./imagens/tenis-esportivo.jpg"
+    imagem: "./imagens/tenis-esportivo.jpg",
+    categoria: "calcados"
   },
   {
     nome: "Sandália Feminina Confort",
     descricao: "Beleza e conforto para seus pés.",
     preco: "R$ 79,90",
-    imagem: "./imagens/sandalia-feminina.jpg"
+    imagem: "./imagens/sandalia-feminina.jpg",
+    categoria: "calcados"
   },
   {
     nome: "Blusa Manga Longa",
@@ -95,7 +102,8 @@ const produtos = [
     nome: "Jaqueta Jeans",
     descricao: "Clássica e versátil para qualquer look.",
     preco: "R$ 159,90",
-    imagem: "./imagens/jaqueta-jeans.jpg"
+    imagem: "./imagens/jaqueta-jeans.jpg",
+    categoria: "roupas"
   },
   {
     nome: "Saia Midi Plissada",
@@ -107,13 +115,15 @@ const produtos = [
     nome: "Bota Cano Curto",
     descricao: "Estilo e proteção para seus pés.",
     preco: "R$ 189,90",
-    imagem: "./imagens/bota-cano-curto.jpg"
+    imagem: "./imagens/bota-cano-curto.jpg",
+    categoria: "calcados"
   },
   {
     nome: "Camisa Social Masculina",
     descricao: "Ideal para trabalho ou eventos formais.",
     preco: "R$ 89,90",
-    imagem: "./imagens/camisa-social.jpg"
+    imagem: "./imagens/camisa-social.jpg",
+    categoria: "roupas"
   },
   // Exemplo de produtos com lançamentos
   {
@@ -121,21 +131,24 @@ const produtos = [
     descricao: "Lançamento: estilo e conforto para o dia a dia.",
     preco: "R$ 159,90",
     imagem: "./imagens/tenis-casual.jpg",
-    lancamento: true
+    lancamento: true,
+    categoria: "calcados"
   },
   {
     nome: "Jaqueta Corta Vento",
     descricao: "Lançamento: proteção leve contra o vento.",
     preco: "R$ 139,90",
     imagem: "./imagens/jaqueta-corta-vento.jpg",
-    lancamento: true
+    lancamento: true,
+    categoria: "roupas"
   },
   {
     nome: "Bolsa Transversal Fashion",
     descricao: "Lançamento: praticidade e elegância.",
     preco: "R$ 89,90",
     imagem: "./imagens/bolsa-transversal.jpg",
-    lancamento: true
+    lancamento: true,
+    categoria: "acessorios"
   }
 ];
 
@@ -263,18 +276,49 @@ function renderizarProdutos(lista) {
   });
 }
 
-// Inicializa o catálogo com todos os produtos
-renderizarProdutos(produtos);
+// categoria ativa atual (all por padrão)
+let categoriaAtiva = 'all';
 
-// Pesquisa de produtos
+// elemento de pesquisa (declarado antes para uso em aplicarFiltro)
 const barraPesquisa = document.getElementById('barra-pesquisa');
-barraPesquisa.addEventListener('input', function() {
-  const termo = this.value.toLowerCase();
-  const filtrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(termo) ||
-    produto.descricao.toLowerCase().includes(termo)
+
+// função que aplica filtros e renderiza
+function aplicarFiltro() {
+  const termo = barraPesquisa ? barraPesquisa.value.toLowerCase() : '';
+  let filtrados = produtos.filter(produto =>
+    (produto.nome.toLowerCase().includes(termo) || produto.descricao.toLowerCase().includes(termo))
   );
+  if (categoriaAtiva !== 'all') {
+    filtrados = filtrados.filter(p => p.categoria === categoriaAtiva);
+  }
   renderizarProdutos(filtrados);
+}
+
+// inicializa: marca 'Todos' ativo e aplica filtro inicial
+const linkTodos = document.querySelector('.nav-categorias a[data-category="all"]');
+if (linkTodos) linkTodos.classList.add('categoria-ativa');
+categoriaAtiva = 'all';
+aplicarFiltro();
+
+// Pesquisa de produtos: chama aplicarFiltro para respeitar categoria ativa
+if (barraPesquisa) {
+  barraPesquisa.addEventListener('input', function() {
+    aplicarFiltro();
+  });
+}
+
+// listeners para categorias (nav)
+const navLinks = document.querySelectorAll('.nav-categorias a');
+navLinks.forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    // remover classe ativa de todos
+    navLinks.forEach(l => l.classList.remove('categoria-ativa'));
+    // marcar ativo
+    this.classList.add('categoria-ativa');
+    categoriaAtiva = this.getAttribute('data-category') || 'all';
+    aplicarFiltro();
+  });
 });
 
 // Filtro de lançamentos
